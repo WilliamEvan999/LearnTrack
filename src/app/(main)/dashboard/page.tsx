@@ -66,7 +66,7 @@ export default function Dashboard() {
       <section className="grid gap-6 lg:grid-cols-2">
 
         <DashboardPanel
-          title="Today's Tasks"
+          title="Uncompleted Tasks"
           href="/tasks"
         >
 
@@ -101,7 +101,7 @@ export default function Dashboard() {
         </DashboardPanel>
 
         <DashboardPanel
-          title="Today's Schedule"
+          title="Upcoming Schedule"
           href="/calendar"
         >
 
