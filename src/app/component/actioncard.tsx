@@ -1,7 +1,11 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
-import {Pencil, Trash2} from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+} from "lucide-react";
 
 type CardActionsProps = {
   editHref: string;
@@ -13,13 +17,16 @@ export default function CardActions({
   onDelete,
 }: CardActionsProps) {
 
-  const [showModal, setShowModal] =
-    useState(false);
+  const [
+    showDeletePopup,
+    setShowDeletePopup,
+  ] = useState(false);
 
   const handleDelete = () => {
 
     onDelete?.();
-    setShowModal(false);
+
+    setShowDeletePopup(false);
 
   };
 
@@ -36,7 +43,9 @@ export default function CardActions({
         </Link>
 
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() =>
+            setShowDeletePopup(true)
+          }
           className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-red-500 transition hover:bg-red-50"
         >
           <Trash2 size={16} />
@@ -44,7 +53,7 @@ export default function CardActions({
 
       </div>
 
-      {showModal && (
+      {showDeletePopup && (
 
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
 
@@ -61,7 +70,9 @@ export default function CardActions({
             <div className="mt-6 flex justify-end gap-3">
 
               <button
-                onClick={() => setShowModal(false)}
+                onClick={() =>
+                  setShowDeletePopup(false)
+                }
                 className="rounded-2xl border border-slate-200 px-5 py-3 text-slate-600 transition hover:bg-slate-100"
               >
                 Cancel

@@ -10,54 +10,57 @@ export const stats = [
     type: "courses",
   },
 
+
   {
     id: 2,
+    title: "Total Tasks",
+    value: 4,
+    type: "total-tasks",
+  },
+  
+  {
+    id: 3,
+    title: "Total Study Hours",
+    value: "39h 24m 5s",
+    type: "study-hours",
+  },
+
+  {
+    id: 4,
+    title: "Best Streak",
+    value: "20 Days",
+    type: "best-streak",
+  },
+
+  {
+    id: 5,
     title: "Completed Courses",
     value: 1,
     type: "completed-courses",
   },
 
-  {
-    id: 3,
-    title: "Total Tasks",
-    value: 4,
-    type: "total-tasks",
-  },
-
-  {
-    id: 4,
+    {
+    id: 6,
     title: "Completed Tasks",
     value: 2,
     type: "completed-tasks",
   },
 
-  {
-    id: 5,
+   {
+    id: 7,
     title: "Today Study Hours",
-    value: "4h 29m",
+    value: "2h 29m 17s",
     type: "today-hours",
   },
 
-  {
-    id: 6,
-    title: "Total Study Hours",
-    value: "2h 3m",
-    type: "study-hours",
-  },
-
-  {
-    id: 7,
+    {
+    id: 8,
     title: "Current Streak",
     value: "12 Days",
     type: "current-streak",                
   },
 
-  {
-    id: 8,
-    title: "Best Streak",
-    value: "20 Days",
-    type: "best-streak",
-  },
+
 ] as const;
 
 export const courses = [
