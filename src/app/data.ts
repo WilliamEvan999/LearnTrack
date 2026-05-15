@@ -214,26 +214,6 @@ export const tasks = [
   },
 ];
 
-export const activities = [
-  {
-    id: 1,
-    activity: "Completed React Basics lesson",
-    time: "2 hours ago",
-  },
-
-  {
-    id: 2,
-    activity: "Added new task",
-    time: "5 hours ago",
-  },
-
-  {
-    id: 3,
-    activity: "Finished PostgreSQL module",
-    time: "Yesterday",
-  },
-];
-
 export const schedules = [
   {
     id: 1,

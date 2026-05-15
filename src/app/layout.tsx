@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Learn Track",
+  title: "Learnify",
   description: "A learning tracker website to organize courses, manage tasks, and monitor study progress.",
 };
 
