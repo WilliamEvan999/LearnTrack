@@ -1,6 +1,7 @@
 import {user, stats, courses, tasks, schedules} from "@/app/data";
 import StatCard from "@/app/component/statcard";
 import DashboardPanel from "@/app/component/dashboardpanel";
+import DarkModeButton from "@/app/component/DarkModeButton";
 
 export default function Dashboard() {
 
@@ -28,11 +29,12 @@ export default function Dashboard() {
         <h1 className="text-3xl font-bold text-slate-800">
           Hello, {user.name}
         </h1>
+        <DarkModeButton />
 
         <p className="mt-2 text-slate-500">
           Ready to continue your learning journey today?
         </p>
-
+ 
       </section>
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
