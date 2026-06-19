@@ -1,6 +1,44 @@
-import Link from "next/link";
+'use client'
+
+import Link from "next/link"
+import { useState } from "react"
+import { useMutation } from "@tanstack/react-query"
+import apiRouter from "@/api/router"
 
 export default function RegisterPage() {
+  const [name, setName] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [passwordConfirmation, setPasswordConfirmation] = useState("")
+
+  const registerMutation = useMutation({
+    mutationFn: apiRouter.users.register,
+  })
+
+  const handleRegister = async (
+    e: React.FormEvent<HTMLFormElement>
+  ) => {
+    e.preventDefault()
+
+    try {
+      const data = await registerMutation.mutateAsync({
+        name,
+        email,
+        password,
+        password_confirmation: passwordConfirmation,
+      })
+
+      localStorage.setItem("token", data.token)
+
+      alert("Register berhasil!")
+
+      window.location.href = "/dashboard"
+    } catch (error) {
+      console.error(error)
+      alert("Register gagal")
+    }
+  }
+
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-100 px-6 py-16">
 
@@ -22,7 +60,10 @@ export default function RegisterPage() {
 
         </div>
 
-        <form className="mt-8 space-y-5">
+        <form
+          onSubmit={handleRegister}
+          className="mt-8 space-y-5"
+        >
 
           <div>
 
@@ -33,6 +74,8 @@ export default function RegisterPage() {
             <input
               type="text"
               placeholder="Enter your full name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white"
             />
 
@@ -47,6 +90,8 @@ export default function RegisterPage() {
             <input
               type="email"
               placeholder="Enter your email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white"
             />
 
@@ -61,6 +106,8 @@ export default function RegisterPage() {
             <input
               type="password"
               placeholder="Create your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white"
             />
 
@@ -75,17 +122,20 @@ export default function RegisterPage() {
             <input
               type="password"
               placeholder="Confirm your password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
               className="mt-2 w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-sky-500 focus:bg-white"
             />
 
           </div>
 
-          <Link
-            href="/login"
+          <button
+            type="submit"
+            disabled={registerMutation.isPending}
             className="flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 font-medium text-white transition hover:bg-slate-800"
           >
-            Register
-          </Link>
+            {registerMutation.isPending ? "Registering..." : "Register"}
+          </button>
 
         </form>
 
@@ -105,5 +155,5 @@ export default function RegisterPage() {
       </div>
 
     </main>
-  );
+  )
 }
