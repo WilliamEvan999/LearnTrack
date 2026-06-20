@@ -1,59 +1,39 @@
 "use client";
-
 import { useState } from "react";
-import {
-  useQuery,
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
-
 import CourseCard from "@/app/component/coursecard";
 import Filter from "@/app/component/filter";
-import apiRouter from "@/api/router";
+import {courses as initialCourses} from "@/app/data";
 
 export default function CoursesPage() {
+
   const [activeTab, setActiveTab] =
     useState("progress");
 
-  const queryClient = useQueryClient();
+  const [courses, setCourses] =
+    useState(initialCourses);
 
-  const { data: courses = [], isLoading} = useQuery({
-    queryKey: ["courses"],
-    queryFn: apiRouter.courses.getCourses,
-  });
+  const deleteCourse = (id: number) => {
 
-  const deleteCourseMutation =
-    useMutation({
-      mutationFn:
-        apiRouter.courses.deleteCourse,
+    setCourses((prevCourses) =>
+      prevCourses.filter(
+        (course) => course.id !== id
+      )
+    );
 
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: ["courses"],
-        });
-      },
-
-      onError: () => {
-        alert(
-          "Failed to delete course"
-        );
-      },
-    });
+  };
 
   const filteredCourses =
     courses.filter((course) =>
       activeTab === "progress"
-        ? (course.progress ?? 0) < 100
-        : (course.progress ?? 0) === 100
+        ? course.progress < 100
+        : course.progress === 100
     );
-
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <div className="space-y-8">
+
       <section>
+
         <h1 className="text-3xl font-bold text-slate-800">
           Courses
         </h1>
@@ -61,6 +41,7 @@ export default function CoursesPage() {
         <p className="mt-2 text-slate-500">
           Continue your learning journey.
         </p>
+
       </section>
 
       <Filter
@@ -69,32 +50,21 @@ export default function CoursesPage() {
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filteredCourses.map(
-          (course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={
-                course.title ?? ""
-              }
-              category={
-                course.category ?? ""
-              }
-              lessons={
-                course.lessons_count ??
-                0
-              }
-              progress={
-                course.progress ?? 0
-              }
-              onDelete={() =>
-                deleteCourseMutation.mutate(
-                  course.id
-                )
-              }
-            />
-          )
-        )}
+
+        {filteredCourses.map((course) => (
+
+          <CourseCard
+            key={course.id}
+            id={course.id}
+            title={course.title}
+            category={course.category}
+            lessons={course.lessons}
+            progress={course.progress}
+            onDelete={() => deleteCourse(course.id)}
+          />
+
+        ))}
+
       </section>
 
       <a
@@ -103,6 +73,7 @@ export default function CoursesPage() {
       >
         +
       </a>
+
     </div>
   );
 }

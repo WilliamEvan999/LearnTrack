@@ -1,173 +1,154 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
-
-import apiRouter from "@/api/router";
+import { useState } from "react";
+import { useParams } from "next/navigation";
+import { courses } from "@/app/data";
 
 export default function EditCoursePage() {
+
   const params = useParams();
 
-  const router = useRouter();
+  const courseId = Number(params.id);
 
-  const queryClient =
-    useQueryClient();
+  const selectedCourse =
+    courses.find(
+      (course) => course.id === courseId
+    );
 
-  const courseId = Number(
-    params.id
-  );
-
-  const [title, setTitle] =
-    useState("");
+  const [courseName, setCourseName] =
+    useState(
+      selectedCourse?.title || ""
+    );
 
   const [category, setCategory] =
-    useState("");
+    useState(
+      selectedCourse?.category || ""
+    );
 
-  const {
-    data: course,
-    isLoading,
-  } = useQuery({
-    queryKey: [
-      "course",
-      courseId,
-    ],
-    queryFn: () =>
-      apiRouter.courses.getCourse(
-        courseId
-      ),
-  });
+  const [sessions, setSessions] =
+    useState(
+      selectedCourse?.sessions || []
+    );
 
-  useEffect(() => {
-    if (course) {
-      setTitle(
-        course.title ?? ""
-      );
+  const addSession = () => {
 
-      setCategory(
-        course.category ?? ""
-      );
-    }
-  }, [course]);
+    setSessions([
+      ...sessions,
 
-  const updateCourseMutation =
-    useMutation({
-      mutationFn: () =>
-        apiRouter.courses.updateCourse({
-          id: courseId,
-          title,
-          category,
-        }),
-
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "courses",
-          ],
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: [
-            "course",
-            courseId,
-          ],
-        });
-
-        queryClient.invalidateQueries({
-          queryKey: [
-            "progress",
-          ],
-        });
-
-        router.push(
-          "/courses"
-        );
+      {
+        title: "",
+        completed: false,
       },
+    ]);
 
-      onError: () => {
-        alert(
-          "Failed to update course"
-        );
-      },
-    });
+  };
+
+  const removeSession = (
+    index: number
+  ) => {
+
+    const updatedSessions =
+      [...sessions];
+
+    updatedSessions.splice(index, 1);
+
+    setSessions(updatedSessions);
+
+  };
+
+  const updateSession = (
+    index: number,
+    value: string
+  ) => {
+
+    const updatedSessions =
+      [...sessions];
+
+    updatedSessions[index].title =
+      value;
+
+    setSessions(updatedSessions);
+
+  };
 
   const handleSubmit = (
     e: React.FormEvent
   ) => {
+
     e.preventDefault();
 
-    if (
-      !title.trim() ||
-      !category.trim()
-    ) {
-      alert(
-        "Please fill all fields"
-      );
+    const updatedCourse = {
 
-      return;
-    }
+      id: courseId,
 
-    updateCourseMutation.mutate();
+      title: courseName,
+
+      category,
+
+      sessions,
+    };
+
+    console.log(updatedCourse);
+
   };
 
-  if (isLoading) {
-    return <div>Loading...</div>;
-  }
+  if (!selectedCourse) {
 
-  if (!course) {
     return (
       <div className="rounded-3xl bg-white p-8 shadow-sm">
+
         <h1 className="text-2xl font-bold text-red-600">
           Course Not Found
         </h1>
+
       </div>
     );
+
   }
 
   return (
     <div className="space-y-8">
+
       <section>
+
         <h1 className="text-4xl font-bold text-slate-900">
           Edit Course
         </h1>
 
         <p className="mt-2 text-slate-500">
-          Update your course
-          information.
+          Update your course data.
         </p>
+
       </section>
 
       <section className="rounded-3xl bg-white p-8 shadow-sm">
+
         <form
+          onSubmit={handleSubmit}
           className="space-y-8"
-          onSubmit={
-            handleSubmit
-          }
         >
+
           <div>
+
             <label className="text-sm font-medium text-slate-700">
               Course Name
             </label>
 
             <input
               type="text"
-              value={title}
+              value={courseName}
               onChange={(e) =>
-                setTitle(
+                setCourseName(
                   e.target.value
                 )
               }
-              placeholder="English Speaking"
               className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
+
           </div>
 
           <div>
+
             <label className="text-sm font-medium text-slate-700">
               Category
             </label>
@@ -180,33 +161,84 @@ export default function EditCoursePage() {
                   e.target.value
                 )
               }
-              placeholder="Language"
               className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
+
           </div>
 
-          <div className="flex gap-4">
-            <Link
-              href="/courses"
-              className="rounded-2xl border border-slate-300 px-6 py-4 font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Cancel
-            </Link>
+          <div>
 
-            <button
-              type="submit"
-              disabled={
-                updateCourseMutation.isPending
-              }
-              className="rounded-2xl bg-sky-600 px-6 py-4 font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {updateCourseMutation.isPending
-                ? "Saving..."
-                : "Save Changes"}
-            </button>
+            <div className="flex items-center justify-between">
+
+              <label className="text-sm font-medium text-slate-700">
+                Course Sessions
+              </label>
+
+              <button
+                type="button"
+                onClick={addSession}
+                className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-sky-700"
+              >
+                + Add Session
+              </button>
+
+            </div>
+
+            <div className="mt-4 space-y-4">
+
+              {sessions.map(
+                (session, index) => (
+
+                  <div
+                    key={index}
+                    className="flex items-center gap-3"
+                  >
+
+                    <input
+                      type="text"
+                      value={session.title}
+                      onChange={(e) =>
+                        updateSession(
+                          index,
+                          e.target.value
+                        )
+                      }
+                      placeholder={`Session ${index + 1}`}
+                      className="w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        removeSession(
+                          index
+                        )
+                      }
+                      className="rounded-2xl bg-red-100 px-4 py-4 text-red-600 transition hover:bg-red-200"
+                    >
+                      ✕
+                    </button>
+
+                  </div>
+
+                )
+              )}
+
+            </div>
+
           </div>
+
+          <button
+            type="submit"
+            className="rounded-2xl bg-sky-600 px-6 py-4 font-medium text-white transition hover:bg-sky-700"
+          >
+            Save Changes
+          </button>
+
         </form>
+
       </section>
+
     </div>
   );
 }
