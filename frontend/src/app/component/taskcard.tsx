@@ -4,8 +4,8 @@ type TaskCardProps = {
   id: number;
   title: string;
   completed: boolean;
-  dueDate: string;
-  course: string;
+  due_date: string;
+  category: string;
   onToggle: () => void;
   onDelete?: () => void;
 };
@@ -14,11 +14,29 @@ export default function TaskCard({
   id,
   title,
   completed,
-  dueDate,
-  course,
+  due_date,
+  category,
   onToggle,
   onDelete,
 }: TaskCardProps) {
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  const dueDate =
+    new Date(due_date);
+
+  dueDate.setHours(0, 0, 0, 0);
+
+  const isOverdue =
+    !completed &&
+    dueDate < today;
+
+  const isDueToday =
+    !completed &&
+    dueDate.getTime() ===
+      today.getTime();
+
   return (
     <div
       className={`rounded-2xl bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-md ${
@@ -27,23 +45,22 @@ export default function TaskCard({
           : ""
       }`}
     >
-
       <div className="flex items-start justify-between gap-4">
-
         <div className="flex items-start gap-4">
-
           <div
             className={`mt-1 h-3 w-3 rounded-full ${
               completed
                 ? "bg-emerald-500"
+                : isOverdue
+                ? "bg-red-500"
+                : isDueToday
+                ? "bg-yellow-500"
                 : "bg-orange-500"
             }`}
           />
 
           <div>
-
             <div className="flex items-center gap-3">
-
               <button
                 onClick={onToggle}
                 className={`flex h-6 w-6 items-center justify-center rounded-full border-2 transition ${
@@ -64,7 +81,6 @@ export default function TaskCard({
               >
                 {title}
               </h3>
-
             </div>
 
             <div
@@ -74,9 +90,8 @@ export default function TaskCard({
                   : "text-slate-500"
               }`}
             >
-
               <span>
-                {course}
+                {category}
               </span>
 
               <span>
@@ -84,26 +99,30 @@ export default function TaskCard({
               </span>
 
               <span>
-                Due {dueDate}
+                Due {due_date}
               </span>
-
             </div>
-
           </div>
-
         </div>
 
         <div className="flex items-center gap-3">
-
           <span
             className={`rounded-xl px-3 py-1 text-xs font-semibold ${
               completed
                 ? "bg-emerald-100 text-emerald-700"
+                : isOverdue
+                ? "bg-red-100 text-red-700"
+                : isDueToday
+                ? "bg-yellow-100 text-yellow-700"
                 : "bg-orange-100 text-orange-600"
             }`}
           >
             {completed
               ? "Completed"
+              : isOverdue
+              ? "Overdue"
+              : isDueToday
+              ? "Due Today"
               : "In Progress"}
           </span>
 
@@ -111,11 +130,8 @@ export default function TaskCard({
             editHref={`/tasks/edit/${id}`}
             onDelete={onDelete}
           />
-
         </div>
-
       </div>
-
     </div>
   );
 }
