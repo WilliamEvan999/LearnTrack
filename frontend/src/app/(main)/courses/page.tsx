@@ -69,30 +69,39 @@ export default function CoursesPage() {
       />
 
       <section className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {filteredCourses.map(
-          (course) => (
-            <CourseCard
-              key={course.id}
-              id={course.id}
-              title={
-                course.title ?? ""
-              }
-              category={
-                course.category ?? ""
-              }
-              lessons={
-                course.lessons_count ??
-                0
-              }
-              progress={
-                course.progress ?? 0
-              }
-              onDelete={() =>
-                deleteCourseMutation.mutate(
-                  course.id
-                )
-              }
-            />
+        {filteredCourses.length ===
+        0 ? (
+          <div className="col-span-full rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-400">
+            {activeTab === "progress"
+              ? "No active courses"
+              : "No completed courses"}
+          </div>
+        ) : (
+          filteredCourses.map(
+            (course) => (
+              <CourseCard
+                key={course.id}
+                id={course.id}
+                title={
+                  course.title ?? ""
+                }
+                category={
+                  course.category ?? ""
+                }
+                lessons={
+                  course.lessons_count ??
+                  0
+                }
+                progress={
+                  course.progress ?? 0
+                }
+                onDelete={() =>
+                  deleteCourseMutation.mutate(
+                    course.id
+                  )
+                }
+              />
+            )
           )
         )}
       </section>

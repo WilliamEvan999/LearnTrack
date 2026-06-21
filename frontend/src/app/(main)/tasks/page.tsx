@@ -182,22 +182,31 @@ export default function TasksPage() {
       />
 
       <section className="space-y-3">
-        {filteredTasks.map((task) => (
-          <TaskCard
-            key={task.id}
-            id={task.id}
-            title={task.title}
-            completed={task.completed}
-            due_date={task.due_date}
-            category={task.category}
-            onToggle={() =>
-              toggleTask(task.id)
-            }
-            onDelete={() =>
-              deleteTask(task.id)
-            }
-          />
-        ))}
+        {filteredTasks.length ===
+        0 ? (
+          <div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-400">
+            {activeTab === "progress"
+              ? "No active tasks"
+              : "No completed tasks"}
+          </div>
+        ) : (
+          filteredTasks.map((task) => (
+            <TaskCard
+              key={task.id}
+              id={task.id}
+              title={task.title}
+              completed={task.completed}
+              due_date={task.due_date}
+              category={task.category}
+              onToggle={() =>
+                toggleTask(task.id)
+              }
+              onDelete={() =>
+                deleteTask(task.id)
+              }
+            />
+          ))
+        )}
       </section>
 
       <Link

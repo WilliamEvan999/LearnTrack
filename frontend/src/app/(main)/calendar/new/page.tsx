@@ -1,135 +1,150 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
+import {
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
+
+import apiRouter from "@/api/router";
 
 export default function NewCalendarSchedulePage() {
+  const router = useRouter();
 
-  const [title, setTitle] = useState("");
+  const queryClient =
+    useQueryClient();
 
-  const [type, setType] = useState("");
+  const [title, setTitle] =
+    useState("");
 
-  const [date, setDate] = useState("");
+  const [scheduleDate, setScheduleDate] =
+    useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const createScheduleMutation =
+    useMutation({
+      mutationFn: () =>
+        apiRouter.schedule.createSchedule({
+          title,
+          schedule_date:
+            scheduleDate,
+        }),
+
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["schedules"],
+        });
+
+        router.push("/calendar");
+      },
+
+      onError: () => {
+        alert(
+          "Failed to create schedule"
+        );
+      },
+    });
+
+  const handleSubmit = (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
 
-    const newSchedule = {
-      title,
-      type,
-      date,
-    };
+    if (
+      !title.trim() ||
+      !scheduleDate
+    ) {
+      alert(
+        "Please fill all fields"
+      );
 
-    console.log(newSchedule);
+      return;
+    }
 
-    setTitle("");
-    setType("");
-    setDate("");
+    createScheduleMutation.mutate();
   };
 
   return (
     <div className="space-y-8">
-
       <section>
-
         <h1 className="text-4xl font-bold text-slate-900">
           Create New Schedule
         </h1>
 
         <p className="mt-2 text-slate-500">
-          Add a new Schedule to your calendar.
+          Add a new schedule to your
+          calendar.
         </p>
-
       </section>
 
       <section className="rounded-3xl bg-white p-8 shadow-sm">
-
         <form
+          className="space-y-8"
           onSubmit={handleSubmit}
-          className="space-y-6"
         >
-
           <div>
-
             <label className="text-sm font-medium text-slate-700">
               Schedule Title
             </label>
 
             <input
               type="text"
-              placeholder="AI Assignment"
               value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
+              onChange={(e) =>
+                setTitle(
+                  e.target.value
+                )
+              }
+              placeholder="Database Exam"
+              className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
-
           </div>
 
           <div>
-
-            <label className="text-sm font-medium text-slate-700">
-              Schedule Type
-            </label>
-
-            <select
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
-            >
-
-              <option value="">
-                Select Schedule Type
-              </option>
-
-              <option value="Assignment">
-                Assignment
-              </option>
-
-              <option value="Project">
-                Project
-              </option>
-
-              <option value="Report">
-                Report
-              </option>
-
-              <option value="Exam">
-                Exam
-              </option>
-
-              <option value="Presentation">
-                Presentation
-              </option>
-
-            </select>
-
-          </div>
-
-          <div>
-
             <label className="text-sm font-medium text-slate-700">
               Schedule Date
             </label>
 
             <input
               type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
+              value={scheduleDate}
+              min={
+                new Date()
+                  .toISOString()
+                  .split("T")[0]
+              }
+              onChange={(e) =>
+                setScheduleDate(
+                  e.target.value
+                )
+              }
+              className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
-
           </div>
 
-          <button
-            type="submit"
-            className="rounded-2xl bg-sky-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-sky-700"
-          >
-            Create Schedule
-          </button>
+          <div className="flex gap-4">
+            <Link
+              href="/calendar"
+              className="rounded-2xl border border-slate-300 px-6 py-4 font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Cancel
+            </Link>
 
+            <button
+              type="submit"
+              disabled={
+                createScheduleMutation.isPending
+              }
+              className="rounded-2xl bg-sky-600 px-6 py-4 font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {createScheduleMutation.isPending
+                ? "Creating..."
+                : "Create Schedule"}
+            </button>
+          </div>
         </form>
-
       </section>
-
     </div>
   );
-} 
+}
