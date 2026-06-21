@@ -1,78 +1,131 @@
 "use client";
 
 import Link from "next/link";
-
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
-  useParams,
-  useRouter,
-} from "next/navigation";
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
 
-import { useState } from "react";
-
-import { tasks } from "@/app/data";
+import apiRouter from "@/api/router";
 
 export default function EditTaskPage() {
+  const params = useParams();
 
   const router = useRouter();
 
-  const params = useParams();
+  const queryClient =
+    useQueryClient();
 
-  const task = tasks.find(
-    (task) =>
-      task.id === Number(params.id)
+  const taskId = Number(
+    params.id
   );
 
   const [title, setTitle] =
-    useState(task?.title || "");
+    useState("");
 
   const [category, setCategory] =
-    useState(task?.course || "");
+    useState("");
 
   const [dueDate, setDueDate] =
-    useState(task?.dueDate || "");
+    useState("");
+
+  const {
+    data: task,
+    isLoading,
+  } = useQuery({
+    queryKey: ["task", taskId],
+    queryFn: () =>
+      apiRouter.tasks.getTask(
+        taskId
+      ),
+  });
+
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title);
+      setCategory(task.category);
+      setDueDate(task.due_date);
+    }
+  }, [task]);
+
+  const updateTaskMutation =
+    useMutation({
+      mutationFn: () =>
+        apiRouter.tasks.updateTask({
+          id: taskId,
+          title,
+          category,
+          due_date: dueDate,
+          completed:
+            task?.completed,
+        }),
+
+      onSuccess: () => {
+        queryClient.invalidateQueries({
+          queryKey: ["tasks"],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: [
+            "task",
+            taskId,
+          ],
+        });
+
+        queryClient.invalidateQueries({
+          queryKey: ["progress"],
+        });
+
+        router.push("/tasks");
+      },
+
+      onError: () => {
+        alert(
+          "Failed to update task"
+        );
+      },
+    });
 
   const handleSubmit = (
     e: React.FormEvent
   ) => {
-
     e.preventDefault();
 
-    const updatedTask = {
-      id: task?.id,
-      title,
-      category,
-      dueDate,
-    };
+    if (
+      !title.trim() ||
+      !category.trim() ||
+      !dueDate
+    ) {
+      alert(
+        "Please fill all fields"
+      );
 
-    console.log(updatedTask);
+      return;
+    }
 
-    router.push("/tasks");
+    updateTaskMutation.mutate();
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!task) {
     return (
-      <div className="space-y-6">
-
-        <h1 className="text-3xl font-bold text-slate-800">
+      <div className="rounded-3xl bg-white p-8 shadow-sm">
+        <h1 className="text-2xl font-bold text-red-600">
           Task Not Found
         </h1>
-
-        <Link
-          href="/tasks"
-          className="inline-flex rounded-2xl bg-sky-600 px-5 py-3 text-white transition hover:bg-sky-700"
-        >
-          Back to Tasks
-        </Link>
-
       </div>
     );
   }
 
   return (
     <div className="space-y-8">
-
       <section>
-
         <h1 className="text-4xl font-bold text-slate-900">
           Edit Task
         </h1>
@@ -80,18 +133,16 @@ export default function EditTaskPage() {
         <p className="mt-2 text-slate-500">
           Update your study task.
         </p>
-
       </section>
 
       <section className="rounded-3xl bg-white p-8 shadow-sm">
-
         <form
-          onSubmit={handleSubmit}
-          className="space-y-6"
+          className="space-y-8"
+          onSubmit={
+            handleSubmit
+          }
         >
-
           <div>
-
             <label className="text-sm font-medium text-slate-700">
               Task Title
             </label>
@@ -100,15 +151,15 @@ export default function EditTaskPage() {
               type="text"
               value={title}
               onChange={(e) =>
-                setTitle(e.target.value)
+                setTitle(
+                  e.target.value
+                )
               }
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
+              className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
-
           </div>
 
           <div>
-
             <label className="text-sm font-medium text-slate-700">
               Category
             </label>
@@ -117,15 +168,15 @@ export default function EditTaskPage() {
               type="text"
               value={category}
               onChange={(e) =>
-                setCategory(e.target.value)
+                setCategory(
+                  e.target.value
+                )
               }
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
+              className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
-
           </div>
 
           <div>
-
             <label className="text-sm font-medium text-slate-700">
               Due Date
             </label>
@@ -134,24 +185,36 @@ export default function EditTaskPage() {
               type="date"
               value={dueDate}
               onChange={(e) =>
-                setDueDate(e.target.value)
+                setDueDate(
+                  e.target.value
+                )
               }
-              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-slate-800 outline-none transition focus:border-sky-500"
+              className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-4 text-slate-800 outline-none focus:border-sky-500"
             />
-
           </div>
 
-          <button
-            type="submit"
-            className="rounded-2xl bg-sky-600 px-6 py-3 text-sm font-medium text-white transition hover:bg-sky-700"
-          >
-            Save Changes
-          </button>
+          <div className="flex gap-4">
+            <Link
+              href="/tasks"
+              className="rounded-2xl border border-slate-300 px-6 py-4 font-medium text-slate-700 transition hover:bg-slate-100"
+            >
+              Cancel
+            </Link>
 
+            <button
+              type="submit"
+              disabled={
+                updateTaskMutation.isPending
+              }
+              className="rounded-2xl bg-sky-600 px-6 py-4 font-medium text-white transition hover:bg-sky-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {updateTaskMutation.isPending
+                ? "Saving..."
+                : "Save Changes"}
+            </button>
+          </div>
         </form>
-
       </section>
-
     </div>
   );
 }
